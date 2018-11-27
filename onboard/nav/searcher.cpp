@@ -5,165 +5,171 @@
 #include <iostream>
 
 Searcher::Searcher(StateMachine* stateMachine_)
-  : currentState(SearchState::SearchFaceNorth)
-  , stateMachine(stateMachine_) { }
+  : /*currentState(SearchState::SearchFaceNorth)
+  ,*/ stateMachine(stateMachine_) { }
 
 
 NavState Searcher::run()
-{ 
-	switch (currentState)
+{
+    // if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
+    // {
+    //     // currentState = SearchState::SearchFaceNorth;
+    //     return NavState::Off;
+    // }
+	switch ( stateMachine->mPhoebe->roverStatus().currentState() )
 	{
-	    case SearchState::SearchFaceNorth:
+	    case NavState::SearchFaceNorth:
 	    {
 	      return executeSearchFaceNorth();
 	    }
 
-	    case SearchState::SearchTurn120:
+	    case NavState::SearchFace120:
 	    {
-	      return executeSearchTurn120();
+	      return executeSearchFace120();
 	    }
 
-	    case SearchState::SearchTurn240:
+	    case NavState::SearchFace240:
 	    {
-	      return executeSearchTurn240();
+	      return executeSearchFace240();
 	    }
 
-	    case SearchState::SearchTurn360:
+	    case NavState::SearchFace360:
 	    {
-	      return executeSearchTurn360();
+	      return executeSearchFace360();
 	    }
 
-	    case SearchState::SearchTurn:
+	    case NavState::SearchTurn:
 	    {
 	      return executeSearchTurn();
 	    }
 
-	    case SearchState::SearchDrive:
+	    case NavState::SearchDrive:
 	    {
 	      return executeSearchDrive();
 	    }
 
-	    case SearchState::TurnToBall:
+	    case NavState::TurnToBall:
 	    {
 	      return executeTurnToBall();
 	    }
 
-	    case SearchState::DriveToBall:
+	    case NavState::DriveToBall:
 	    {
 	      return executeDriveToBall();
 	    }
-
+        default:
+        {
+            return NavState::Unknown;
+        }
 	} // switch
-	
-	return NavState::Unknown;
 }
 
 // Executes the logic for turning to face north to orient itself for
 // a search. If the rover is turned off, it proceeds to Off. If the
 // rover detects the tennis ball, it proceeds to the ball If the rover
-// finishes turning, it proceeds to SearchTurn120. Else the rover keeps
+// finishes turning, it proceeds to SearchFace120. Else the rover keeps
 // turning to north.
 NavState Searcher::executeSearchFaceNorth()
 {
-	if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
-	{
-    	currentState = SearchState::SearchFaceNorth;
-		return NavState::Off;
-	}
+	// if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
+	// {
+ //    	currentState = SearchState::SearchFaceNorth;
+	// 	return NavState::Off;
+	// }
 	if( stateMachine->mPhoebe->roverStatus().tennisBall().found )
 	{
-    	currentState = SearchState::TurnToBall;
-		return NavState::Search;
+    	// currentState = SearchState::TurnToBall;
+		return NavState::TurnToBall;
 	}
 	if( stateMachine->mPhoebe->turn( 90 ) )
 	{
-    	currentState = SearchState::SearchTurn120;
-		return NavState::Search;
+    	// currentState = SearchState::SearchFace120;
+		return NavState::SearchFace120;
 	}
-  	
-  	currentState = SearchState::SearchFaceNorth;
-	return NavState::Search;
+
+  	// currentState = SearchState::SearchFaceNorth;
+	return NavState::SearchFaceNorth;
 } // executeSearchFaceNorth
 
 // Executes the logic for the first third of the initial 360 degree
 // turn of the search. If the rover is turned off, the rover proceeds
 // to Off. If the rover detects the tennis ball, it proceeds to the
-// ball. If the rover finishes turning, it proceeds to SearchTurn240.
+// ball. If the rover finishes turning, it proceeds to SearchFace240.
 // Else the rover keeps turning to 120 degrees.
-NavState Searcher::executeSearchTurn120()
+NavState Searcher::executeSearchFace120()
 {
-	if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
-	{
-    	currentState = SearchState::SearchFaceNorth;
-		return NavState::Off;
-	}
+	// if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
+	// {
+ //    	currentState = SearchState::SearchFaceNorth;
+	// 	return NavState::Off;
+	// }
 	if( stateMachine->mPhoebe->roverStatus().tennisBall().found )
 	{
-    	currentState = SearchState::TurnToBall;
-		return NavState::Search;
+    	// currentState = SearchState::TurnToBall;
+		return NavState::TurnToBall;
 	}
 	if( stateMachine->mPhoebe->turn( 210 ) )
 	{
-    	currentState = SearchState::SearchTurn240;
-		return NavState::Search;
+    	// currentState = SearchState::SearchFace240;
+		return NavState::SearchFace240;
 	}
-  
-    currentState = SearchState::SearchTurn120;
-    return NavState::Search;
-} // executeSearchTurn120()
+
+    // currentState = SearchState::SearchFace120;
+    return NavState::SearchFace120;
+} // executeSearchFace120()
 
 // Executes the logic for the second third of the initial 360 degree
 // turn of the search. If the rover is turned off, the rover proceeds
 // to Off. If the rover detects the tennis ball, it proceeds to the
-// ball. If the rover finishes turning, it proceeds to SearchTurn360.
+// ball. If the rover finishes turning, it proceeds to SearchFace360.
 // Else the rover keeps turning to 240 degrees.
-NavState Searcher::executeSearchTurn240()
+NavState Searcher::executeSearchFace240()
 {
-	if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
-	{
-    currentState = SearchState::SearchFaceNorth;
-		return NavState::Off;
-	}
+	// if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
+	// {
+ //    currentState = SearchState::SearchFaceNorth;
+	// 	return NavState::Off;
+	// }
 	if( stateMachine->mPhoebe->roverStatus().tennisBall().found )
 	{
-    currentState = SearchState::TurnToBall;
-    return NavState::Search;
+    // currentState = SearchState::TurnToBall;
+    return NavState::TurnToBall;
 	}
 	if( stateMachine->mPhoebe->turn( 330 ) )
 	{
-    currentState = SearchState::SearchTurn360;
-    return NavState::Search;
+    // currentState = SearchState::SearchFace360;
+    return NavState::SearchFace360;
 	}
-  currentState = SearchState::SearchTurn240;
-  return NavState::Search;
-} // executeSearchTurn240
+  // currentState = SearchState::SearchFace240;
+  return NavState::SearchFace240;
+} // executeSearchFace240
 
 // Executes the logic for the final third of the initial 360 degree
 // turn of the search. If the rover is turned off, the rover proceeds
 // to Off. If the rover detects the tennis ball, it proceeds to the
 // ball. If the rover finishes turning, the next state is SearchDrive.
 // Else the rover keeps turning to 360 degrees.
-NavState Searcher::executeSearchTurn360()
+NavState Searcher::executeSearchFace360()
 {
-	if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
-	{
-    currentState = SearchState::SearchFaceNorth;
-		return NavState::Off;
-	}
+	// if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
+	// {
+ //    currentState = SearchState::SearchFaceNorth;
+	// 	return NavState::Off;
+	// }
 	if( stateMachine->mPhoebe->roverStatus().tennisBall().found )
 	{
-    currentState = SearchState::TurnToBall;
-    return NavState::Search;
+    // currentState = SearchState::TurnToBall;
+    return NavState::TurnToBall;
 	}
 	if( stateMachine->mPhoebe->turn( 90 ) )
 	{
 		initializeSearch();
-    currentState = SearchState::SearchTurn;
-    return NavState::Search;
+    // currentState = SearchState::SearchTurn;
+    return NavState::SearchTurn;
 	}
-  currentState = SearchState::SearchTurn360;
-  return NavState::Search;
-} // executeSearchTurn360()
+  // currentState = SearchState::SearchFace360;
+  return NavState::SearchFace360;
+} // executeSearchFace360()
 
 // Executes the logic for turning while searching. If the rover is
 // turned off, the rover proceeds to Off. If the rover detects the
@@ -172,24 +178,24 @@ NavState Searcher::executeSearchTurn360()
 // turning to the next Waypoint.
 NavState Searcher::executeSearchTurn()
 {
-	if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
-	{
-    	currentState = SearchState::SearchFaceNorth;
-		return NavState::Off;
-	}
+	// if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
+	// {
+ //    	currentState = SearchState::SearchFaceNorth;
+	// 	return NavState::Off;
+	// }
 	if( stateMachine->mPhoebe->roverStatus().tennisBall().found )
 	{
-    	currentState = SearchState::TurnToBall;
-    	return NavState::Search;
+    	// currentState = SearchState::TurnToBall;
+    	return NavState::TurnToBall;
 	}
-	
+
 	if( mSearchPoints.empty() )
 	{
 		if( !addFourPointsToSearch() )
 		{
 			stateMachine->mPhoebe->roverStatus().path().pop();
 			stateMachine->mMissedWaypoints += 1;
-      		currentState = SearchState::SearchFaceNorth;
+      		// currentState = SearchState::SearchFaceNorth; // todo
 			return NavState::Turn;
 		}
 	}
@@ -197,12 +203,12 @@ NavState Searcher::executeSearchTurn()
 	Odometry& nextSearchPoint = mSearchPoints.front();
 	if( stateMachine->mPhoebe->turn( nextSearchPoint ) )
 	{
-    	currentState = SearchState::SearchDrive;
-   		return NavState::Search;
+    	// currentState = SearchState::SearchDrive;
+   		return NavState::SearchDrive;
 	}
-  
-  currentState = SearchState::SearchTurn;
-  return NavState::Search;
+
+  // currentState = SearchState::SearchTurn;
+  return NavState::SearchTurn;
 } // executeSearchTurn()
 
 // Executes the logic for driving while searching. If the rover is
@@ -213,21 +219,21 @@ NavState Searcher::executeSearchTurn()
 // keeps driving to the next Waypoint.
 NavState Searcher::executeSearchDrive()
 {
-	if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
-	{
-   		currentState = SearchState::SearchFaceNorth;
-		return NavState::Off;
-	}
+	// if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
+	// {
+ //   		currentState = SearchState::SearchFaceNorth;
+	// 	return NavState::Off;
+	// }
 	if( stateMachine->mPhoebe->roverStatus().tennisBall().found )
 	{
-    	currentState = SearchState::TurnToBall;
-    	return NavState::Search;
+    	// currentState = SearchState::TurnToBall;
+    	return NavState::TurnToBall;
 	}
-	
+
 	if( stateMachine->mPhoebe->roverStatus().obstacle().detected )
 	{
         stateMachine->mOriginalObstacleAngle = stateMachine->mPhoebe->roverStatus().obstacle().bearing;
-    	currentState = SearchState::SearchTurn;
+    	// currentState = SearchState::SearchTurn; // todo
 		return NavState::SearchTurnAroundObs;
 	}
 
@@ -236,17 +242,17 @@ NavState Searcher::executeSearchDrive()
 	if( driveStatus == DriveStatus::Arrived )
 	{
 		mSearchPoints.pop();
-    	currentState = SearchState::SearchTurn;
-		return NavState::Search;
+    	// currentState = SearchState::SearchTurn;
+		return NavState::SearchTurn;
 	}
 	if( driveStatus == DriveStatus::OnCourse )
 	{
-    	currentState = SearchState::SearchDrive;
-		return NavState::Search;
+    	// currentState = SearchState::SearchDrive;
+		return NavState::SearchDrive;
 	}
 	// if driveStatus == DriveStatus::OffCourse
-  	currentState = SearchState::SearchTurn;
-  	return NavState::Search;
+  	// currentState = SearchState::SearchTurn;
+  	return NavState::SearchTurn;
 } // executeSearchDrive()
 
 // Executes the logic for turning to the tennis ball. If the rover is
@@ -256,25 +262,25 @@ NavState Searcher::executeSearchDrive()
 // ball.
 NavState Searcher::executeTurnToBall()
 {
-	if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
-	{
-    	currentState = SearchState::SearchFaceNorth;
-		return NavState::Off;
-	}
+	// if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
+	// {
+ //    	currentState = SearchState::SearchFaceNorth;
+	// 	return NavState::Off;
+	// }
 	if( !stateMachine->mPhoebe->roverStatus().tennisBall().found )
 	{
-    	currentState = SearchState::SearchFaceNorth;
-		return NavState::Search;
+    	// currentState = SearchState::SearchFaceNorth;
+		return NavState::SearchFaceNorth;
 	}
-	if( stateMachine->mPhoebe->turn( stateMachine->mPhoebe->roverStatus().tennisBall().bearing + 
-					stateMachine->mPhoebe->roverStatus().odometry().bearing_deg) )
+	if( stateMachine->mPhoebe->turn( stateMachine->mPhoebe->roverStatus().tennisBall().bearing +
+					stateMachine->mPhoebe->roverStatus().bearing().bearing ) )
 	{
-    	currentState = SearchState::DriveToBall;
-		return NavState::Search;
+    	// currentState = SearchState::DriveToBall;
+		return NavState::DriveToBall;
 	}
 
-    currentState = SearchState::TurnToBall;
-    return NavState::Search;
+    // currentState = SearchState::TurnToBall;
+    return NavState::TurnToBall;
 } // executeTurnToBall()
 
 // Executes the logic for driving to the tennis ball. If the rover is
@@ -286,40 +292,41 @@ NavState Searcher::executeTurnToBall()
 // continues driving to the ball.
 NavState Searcher::executeDriveToBall()
 {
-	if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
-	{
-    	currentState = SearchState::SearchFaceNorth;
-		return NavState::Off;
-	}
+	// if( !stateMachine->mPhoebe->roverStatus().autonState().is_auton )
+	// {
+ //    	currentState = SearchState::SearchFaceNorth;
+	// 	return NavState::Off;
+	// }
 	if( !stateMachine->mPhoebe->roverStatus().tennisBall().found )
 	{
-    	currentState = SearchState::SearchFaceNorth;
-		return NavState::Search;
+    	// currentState = SearchState::SearchFaceNorth;
+		return NavState::SearchFaceNorth;
 	}
 	// TODO: save location of ball then go around object?
 	if( stateMachine->mPhoebe->roverStatus().obstacle().detected )
 	{
         stateMachine->mOriginalObstacleAngle = stateMachine->mPhoebe->roverStatus().obstacle().bearing;
-    	currentState = SearchState::SearchFaceNorth;
+    	// currentState = SearchState::SearchFaceNorth; // todo
 		return NavState::SearchTurnAroundObs;
 	}
 	DriveStatus driveStatus = stateMachine->mPhoebe->drive( stateMachine->mPhoebe->roverStatus().tennisBall().distance,
-											stateMachine->mPhoebe->roverStatus().tennisBall().bearing );
+											stateMachine->mPhoebe->roverStatus().tennisBall().bearing +
+                                            stateMachine->mPhoebe->roverStatus().bearing().bearing );
 	if( driveStatus == DriveStatus::Arrived )
 	{
 		stateMachine->mPhoebe->roverStatus().path().pop();
         stateMachine->mCompletedWaypoints += 1;
-    	currentState = SearchState::SearchFaceNorth;
+    	// currentState = SearchState::SearchFaceNorth; // todo
 		return NavState::Turn;
 	}
 	if( driveStatus == DriveStatus::OnCourse )
 	{
-   		currentState = SearchState::DriveToBall;
-		return NavState::Search;
+   		// currentState = SearchState::DriveToBall;
+		return NavState::DriveToBall;
 	}
 	// if driveStatus == DriveStatus::OffCourse
-  	currentState = SearchState::TurnToBall;
-  	return NavState::Search;
+  	// currentState = SearchState::TurnToBall;
+  	return NavState::TurnToBall;
 } // executeDriveToBall()
 
 // Initializes the search ponit multipliers to be the intermost loop

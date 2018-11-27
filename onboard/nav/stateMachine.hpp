@@ -99,7 +99,7 @@ private:
 	bool mStateChanged;
 
 	// Search object to control all search states
-	Searcher searcher;
+	Searcher mSearcher;
 
 }; // StateMachine
 

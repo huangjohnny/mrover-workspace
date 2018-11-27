@@ -8,9 +8,9 @@ class StateMachine;
 class Searcher {
 public:
   Searcher(StateMachine* stateMachine_);
-  
+
   NavState run();
-  
+
   // Queue of search points.
   queue<Odometry> mSearchPoints;
 
@@ -18,9 +18,9 @@ private:
   enum class SearchState
   {
     SearchFaceNorth,
-    SearchTurn120,
-    SearchTurn240,
-    SearchTurn360,
+    SearchFace120,
+    SearchFace240,
+    SearchFace360,
     SearchTurn,
     SearchDrive,
     TurnToBall,
@@ -29,11 +29,11 @@ private:
 
   NavState executeSearchFaceNorth();
 
-  NavState executeSearchTurn120();
+  NavState executeSearchFace120();
 
-  NavState executeSearchTurn240();
+  NavState executeSearchFace240();
 
-  NavState executeSearchTurn360();
+  NavState executeSearchFace360();
 
   NavState executeSearchTurn();
 
@@ -53,8 +53,8 @@ private:
 
 
 public:
-    
-    SearchState currentState;
+
+    // SearchState currentState;
 
     StateMachine* stateMachine;
 

@@ -21,7 +21,7 @@ StateMachine::StateMachine( lcm::LCM& lcmObject )
 	, mCompletedWaypoints( 0 )
 	, mMissedWaypoints( 0 )
 	, mStateChanged( true )
-	, searcher(this)
+	, mSearcher( this )
 {
 	ifstream configFile;
 	configFile.open( "/vagrant/onboard/nav/config.json" );
@@ -51,9 +51,21 @@ void StateMachine::run()
 {
 	if( mStateChanged || mPhoebe->updateRover( mNewRoverStatus ) )
 	{
+		// todo print state, add to publish nav state
 		publishNavState();
 		mStateChanged = false;
 		NavState nextState = NavState::Unknown;
+
+		if( !mPhoebe->roverStatus().autonState().is_auton )
+		{
+			nextState = NavState::Off;
+		    if( nextState != mPhoebe->roverStatus().currentState() )
+		    {
+			    mPhoebe->roverStatus().currentState() = nextState;
+			    mStateChanged = true;
+		    }
+			return;
+        }
 
 		switch( mPhoebe->roverStatus().currentState() )
 		{
@@ -81,9 +93,16 @@ void StateMachine::run()
 				break;
 			}
 
-			case NavState::Search:
+			case NavState::SearchFaceNorth:
+			case NavState::SearchFace120:
+			case NavState::SearchFace240:
+			case NavState::SearchFace360:
+			case NavState::SearchTurn:
+			case NavState::SearchDrive:
+			case NavState::TurnToBall:
+			case NavState::DriveToBall:
 			{
-				nextState = searcher.run();
+				nextState = mSearcher.run();
 				break;
 			}
 
@@ -194,10 +213,10 @@ NavState StateMachine::executeOff()
 // rover.
 NavState StateMachine::executeDone()
 {
-	if( !mPhoebe->roverStatus().autonState().is_auton )
-	{
-		return NavState::Off;
-	}
+	// if( !mPhoebe->roverStatus().autonState().is_auton )
+	// {
+	// 	return NavState::Off;
+	// }
 	mPhoebe->stop();
 	return NavState::Done;
 } // executeDone()
@@ -207,10 +226,10 @@ NavState StateMachine::executeDone()
 // next Waypoint. Else the rover keeps turning to the Waypoint.
 NavState StateMachine::executeTurn()
 {
-	if( !mPhoebe->roverStatus().autonState().is_auton )
-	{
-		return NavState::Off;
-	}
+	// if( !mPhoebe->roverStatus().autonState().is_auton )
+	// {
+	// 	return NavState::Off;
+	// }
 	if( mPhoebe->roverStatus().path().empty() )
 	{
 		return NavState::Done;
@@ -232,10 +251,10 @@ NavState StateMachine::executeTurn()
 // keeps driving to the next Waypoint.
 NavState StateMachine::executeDrive()
 {
-	if( !mPhoebe->roverStatus().autonState().is_auton )
-	{
-		return NavState::Off;
-	}
+	// if( !mPhoebe->roverStatus().autonState().is_auton )
+	// {
+	// 	return NavState::Off;
+	// }
 	// if( mPhoebe->roverStatus().path().empty() )
 	// {
 	// 	return NavState::Done;
@@ -252,7 +271,7 @@ NavState StateMachine::executeDrive()
 	{
 		if( nextWaypoint.search )
 		{
-			return NavState::Search;
+			return NavState::SearchFaceNorth;
 		}
 		mPhoebe->roverStatus().path().pop();
 		++mCompletedWaypoints;
@@ -278,13 +297,14 @@ NavState StateMachine::executeDrive()
 //			   confidentally see to the side.
 NavState StateMachine::executeTurnAroundObs()
 {
-	if( !mPhoebe->roverStatus().autonState().is_auton )
-	{
-		return NavState::Off;
-	}
+	// if( !mPhoebe->roverStatus().autonState().is_auton )
+	// {
+	// 	return NavState::Off;
+	// }
 	if( mPhoebe->roverStatus().tennisBall().found )
 	{
-		return NavState::Search;
+		return NavState::TurnToBall;
+		// return NavState::Search; // todo
 	}
 
 	double cvThresh = mRoverConfig[ "cvThresh" ].GetDouble();
@@ -297,11 +317,12 @@ NavState StateMachine::executeTurnAroundObs()
 		return NavState::Turn;
 	}
 	if( ( mPhoebe->roverStatus().currentState() == NavState::SearchTurnAroundObs ) &&
-		( estimateNoneuclid( searcher.mSearchPoints.front(), mPhoebe->roverStatus().odometry() )
+		( estimateNoneuclid( mSearcher.mSearchPoints.front(), mPhoebe->roverStatus().odometry() )
 		  < 2 * cvThresh ) )
 	{
-		searcher.mSearchPoints.pop();
-		return NavState::Search;
+		mSearcher.mSearchPoints.pop();
+		return NavState::SearchTurn;
+		// return NavState::Search; // todo
 	}
 	if( !mPhoebe->roverStatus().obstacle().detected )
 	{
@@ -329,10 +350,10 @@ NavState StateMachine::executeTurnAroundObs()
 // TODO: fix the case about when the obstacle gets off course.
 NavState StateMachine::executeDriveAroundObs()
 {
-	if( !mPhoebe->roverStatus().autonState().is_auton )
-	{
-		return NavState::Off;
-	}
+	// if( !mPhoebe->roverStatus().autonState().is_auton )
+	// {
+	// 	return NavState::Off;
+	// }
 	if( mPhoebe->roverStatus().obstacle().detected )
 	{
 		mOriginalObstacleAngle = mPhoebe->roverStatus().obstacle().bearing;
@@ -341,7 +362,7 @@ NavState StateMachine::executeDriveAroundObs()
 			printf("here2\n");
 			return NavState::TurnAroundObs;
 		}
-		return NavState::Search;
+		return NavState::SearchTurnAroundObs;
 	}
 
 	DriveStatus driveStatus = mPhoebe->drive( mObstacleAvoidancePoint );
@@ -351,7 +372,7 @@ NavState StateMachine::executeDriveAroundObs()
 		{
 			return NavState::Turn;
 		}
-		return NavState::Search;
+		return NavState::SearchTurn;
 	}
 	if( driveStatus == DriveStatus::OnCourse )
 	{

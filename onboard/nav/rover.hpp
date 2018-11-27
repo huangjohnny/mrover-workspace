@@ -24,7 +24,14 @@ enum class NavState
 	Done = 1,
 	Turn = 10,
 	Drive = 11,
-	Search = 20,
+	SearchFaceNorth = 20,
+	SearchFace120 = 21,
+	SearchFace240 = 22,
+	SearchFace360 = 23,
+	SearchTurn = 24,
+	SearchDrive = 25,
+	TurnToBall = 28,
+	DriveToBall = 29,
 	TurnAroundObs = 30,
 	DriveAroundObs = 31,
 	SearchTurnAroundObs = 32,
@@ -32,18 +39,18 @@ enum class NavState
 	Unknown = 255
 }; // AutonState
 
-// This class is the representation of the search states.
-enum class SearchState
-{
-	SearchFaceNorth = 21,
-	SearchTurn120 = 22,
-	SearchTurn240 = 23,
-	SearchTurn360 = 24,
-	SearchTurn = 25,
-	SearchDrive = 26,
-	TurnToBall = 28,
-	DriveToBall = 29,
-};
+// // This class is the representation of the search states.
+// enum class SearchState
+// {
+// 	SearchFaceNorth = 21,
+// 	SearchFace120 = 22,
+// 	SearchFace240 = 23,
+// 	SearchFace360 = 24,
+// 	SearchTurn = 25,
+// 	SearchDrive = 26,
+// 	TurnToBall = 28,
+// 	DriveToBall = 29,
+// };
 
 // This class is the representation of the drive status.
 enum class DriveStatus
